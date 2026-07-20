@@ -1,9 +1,15 @@
 public with sharing class IncreaseOpportunityAmountController {
 
+    private static final String INCREASE_PERCENT = 'INCREASE_PERCENT';
+    private static final String DECREASE_PERCENT = 'DECREASE_PERCENT';
+    private static final String INCREASE_VALUE = 'INCREASE_VALUE';
+    private static final String DECREASE_VALUE = 'DECREASE_VALUE';
+    private static final String REPLACE_VALUE = 'REPLACE_VALUE';
+
     @AuraEnabled
-    public static Integer updateOpportunityAmounts(Id accountId, Decimal percentage) {
-        if (accountId == null || percentage == null) {
-            throw new AuraHandledException('Account and percentage are required.');
+    public static Integer updateOpportunityAmounts(Id accountId, String changeType, Decimal value) {
+        if (accountId == null || changeType == null || value == null) {
+            throw new AuraHandledException('Account, change type and value are required.');
         }
 
         List<Opportunity> oppsToUpdate = [
@@ -14,8 +20,7 @@ public with sharing class IncreaseOpportunityAmountController {
         ];
 
         for (Opportunity opp : oppsToUpdate) {
-            Decimal currentAmount = opp.Amount == null ? 0 : opp.Amount;
-            opp.Amount = currentAmount + (currentAmount * percentage / 100);
+            opp.Amount = applyChange(opp.Amount, changeType, value);
         }
 
         if (!oppsToUpdate.isEmpty()) {
@@ -27,5 +32,30 @@ public with sharing class IncreaseOpportunityAmountController {
         }
 
         return oppsToUpdate.size();
+    }
+
+    private static Decimal applyChange(Decimal amount, String changeType, Decimal value) {
+        Decimal currentAmount = amount == null ? 0 : amount;
+
+        switch on changeType {
+            when 'INCREASE_PERCENT' {
+                return currentAmount + (currentAmount * value / 100);
+            }
+            when 'DECREASE_PERCENT' {
+                return currentAmount - (currentAmount * value / 100);
+            }
+            when 'INCREASE_VALUE' {
+                return currentAmount + value;
+            }
+            when 'DECREASE_VALUE' {
+                return currentAmount - value;
+            }
+            when 'REPLACE_VALUE' {
+                return value;
+            }
+            when else {
+                throw new AuraHandledException('Unsupported change type: ' + changeType);
+            }
+        }
     }
 }

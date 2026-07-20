@@ -1,20 +1,28 @@
 <template>
-    <lightning-card title="Increase Opportunity Amounts" icon-name="standard:opportunity">
+    <lightning-card title="Update Opportunity Amounts" icon-name="standard:opportunity">
         <div class="slds-p-around_medium">
             <p class="slds-text-heading_small slds-m-bottom_medium">COUCOU ! Successful LWC creation!</p>
 
+            <lightning-combobox
+                label="Change Type"
+                value={changeType}
+                options={changeTypeOptions}
+                onchange={handleChangeTypeChange}
+            ></lightning-combobox>
+
             <lightning-input
+                class="slds-m-top_medium"
                 type="number"
-                label="Percentage increase (%)"
-                value={percentage}
+                label={valueInputLabel}
+                value={value}
                 step="0.01"
-                onchange={handlePercentageChange}
+                onchange={handleValueChange}
             ></lightning-input>
 
             <div class="slds-m-top_medium">
                 <lightning-button
                     variant="brand"
-                    label="Apply Increase"
+                    label="Apply"
                     onclick={handleApply}
                     disabled={isApplyDisabled}
                 ></lightning-button>
