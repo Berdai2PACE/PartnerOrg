@@ -1,0 +1,7 @@
+mergeTargets:
+  - prod
+targetUsername: samuel.arzur.ext@2pace.fr.uat2pace
+instanceUrl: https://mydomain--myssandbox.sandbox.my.salesforce.com
+skipCodeCoverage: true
+testCoverageNotBlocking: true
+testLevel: NoTestRun

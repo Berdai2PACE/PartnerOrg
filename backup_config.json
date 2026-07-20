@@ -1,0 +1,971 @@
+{
+    "api_version": "65.0",
+    "backup_window": 1,
+    "commun_where_clause": "LastModifiedDate = LAST_N_DAYS:${backup_window}",
+    "tooling_metadatas": {
+        "ApexClass": {
+            "entity": "ApexClass",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": "" 
+        },
+        "ApexComponent": {
+            "entity": "ApexComponent",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "ApexPage": {
+            "entity": "ApexPage",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "ApexTestSuite": {
+            "entity": "ApexTestSuite",
+            "fields": [
+                "TestSuiteName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "TestSuiteName",
+            "where_clause": ""
+        },
+        "ApexTrigger": {
+            "entity": "ApexTrigger",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "AppMenu": {
+            "entity": "AppMenu",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ApprovalProcess": {
+            "entity": "ApprovalProcess",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "AssignmentRule": {
+            "entity": "AssignmentRule",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "AuraDefinitionBundle": {
+            "entity": "AuraDefinitionBundle",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "BusinessProcess": {
+            "entity": "BusinessProcess",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "CaseSubjectParticle": {
+            "entity": "CaseSubjectParticle",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CommunityTemplateDefinition": {
+            "entity": "CommunityTemplateDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CommunityThemeDefinition": {
+            "entity": "CommunityThemeDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CompactLayout": {
+            "entity": "CompactLayout",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ConnectedApp": {
+            "entity": "ConnectedApplication",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ContextDefinition": {
+            "entity": "ContextDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomApplication": {
+            "entity": "CustomApplication",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomApplicationComponent": {
+            "entity": "CustomApplicationComponent",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomField": {
+            "entity": "CustomField",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name",
+                "EntityDefinition.DeveloperName"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomLabel": {
+            "entity": "CustomLabel",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "CustomNotificationType": {
+            "entity": "CustomNotificationType",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomObject": {
+            "entity": "CustomObject",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomObjectTranslation": {
+            "entity": "CustomObjectTranslation",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomSite": {
+            "entity": "CustomSite",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomTab": {
+            "entity": "CustomTab",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DashboardFolder": {
+            "entity": "DashboardFolder",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Document": {
+            "entity": "Document",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DocumentCategory": {
+            "entity": "DocumentCategory",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DocumentCategoryDocumentType": {
+            "entity": "DocumentCategoryDocumentType",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DocumentFolder": {
+            "entity": "DocumentFolder",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DocumentTemplate": {
+            "entity": "DocumentTemplate",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DocumentType": {
+            "entity": "DocumentType",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DynamicTrigger": {
+            "entity": "DynamicTrigger",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "EmailFolder": {
+            "entity": "EmailFolder",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "EmailTemplate": {
+            "entity": "EmailTemplate",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "EmailTemplateFolder": {
+            "entity": "EmailTemplateFolder",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ExperienceBundle": {
+            "entity": "ExperienceBundle",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ExperiencePropertyTypeBundle": {
+            "entity": "ExperiencePropertyTypeBundle",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ExternalAuthIdentityProvider": {
+            "entity": "ExternalAuthIdentityProvider",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ExternalCredential": {
+            "entity": "ExternalCredential",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "FieldSet": {
+            "entity": "FieldSet",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "FlexiPage": {
+            "entity": "FlexiPage",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Flow": {
+            "entity": "Flow",
+            "fields": [
+                "FullName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "CreatedDate",
+            "where_clause": ""
+        },
+        "FlowCategory": {
+            "entity": "FlowCategory",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "FlowDefinition": {
+            "entity": "FlowDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "FlowTest": {
+            "entity": "FlowTest",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "GlobalValueSet": {
+            "entity": "GlobalValueSet",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "GlobalValueSetTranslation": {
+            "entity": "GlobalValueSetTranslation",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "HomePageComponent": {
+            "entity": "HomePageComponent",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "HomePageLayout": {
+            "entity": "HomePageLayout",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "Layout": {
+            "entity": "Layout",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "LightningComponentBundle": {
+            "entity": "LightningComponentBundle",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "LightningExperienceTheme": {
+            "entity": "LightningExperienceTheme",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "MutingPermissionSet": {
+            "entity": "MutingPermissionSet",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "NamedCredential": {
+            "entity": "NamedCredential",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "NavigationMenu": {
+            "entity": "NavigationMenu",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "PermissionSet": {
+            "entity": "PermissionSet",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "PermissionSetGroup": {
+            "entity": "PermissionSetGroup",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "PermissionSetLicenseDefinition": {
+            "entity": "PermissionSetLicenseDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Portal": {
+            "entity": "Portal",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ProductAttrDisplayConfig": {
+            "entity": "ProductAttrDisplayConfig",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ProductAttributeSet": {
+            "entity": "ProductAttributeSet",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ProductSpecificationRecType": {
+            "entity": "ProductSpecificationRecType",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ProductSpecificationType": {
+            "entity": "ProductSpecificationType",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "QuickAction": {
+            "entity": "QuickAction",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "RecordType": {
+            "entity": "RecordType",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "RestrictionRule": {
+            "entity": "RestrictionRule",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Role": {
+            "entity": "Role",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "SharingSet": {
+            "entity": "SharingSet",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "SiteDotCom": {
+            "entity": "SiteDotCom",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "StaticResource": {
+            "entity": "StaticResource",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "ValidationRule": {
+            "entity": "ValidationRule",
+            "fields": [
+                "ValidationName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "ValidationName",
+            "where_clause": ""
+        },
+        "ViewDefinition": {
+            "entity": "ViewDefinition",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Workflow": {
+            "entity": "Workflow",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "WorkflowOutboundMessage": {
+            "entity": "WorkflowOutboundMessage",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "WorkflowRule": {
+            "entity": "WorkflowRule",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "WorkflowTask": {
+            "entity": "WorkflowTask",
+            "fields": [
+                "FullName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "CreatedDate",
+            "where_clause": ""
+        },
+        "CustomMetadataObject": {
+            "entity": "EntityDefinition",
+            "fields": [
+                "DeveloperName",
+                "QualifiedApiName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": "QualifiedApiName LIKE '%__mdt%'"
+        }
+    },
+
+    "metadatas": {
+        "Community": {
+            "entity": "Community",
+            "fields": [
+                "Name",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Name",
+            "where_clause": ""
+        },
+        "ContentAsset": {
+            "entity": "ContentAsset",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "CustomPermission": {
+            "entity": "CustomPermission",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Dashboard": {
+            "entity": "Dashboard",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "DuplicateRule": {
+            "entity": "DuplicateRule",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "EmailServicesFunction": {
+            "entity": "EmailServicesFunction",
+            "fields": [
+                "FunctionName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "FunctionName",
+            "where_clause": ""
+        },
+        "ExternalClientApplication": {
+            "entity": "ExternalClientApplication",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "ListView": {
+            "entity": "ListView",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "MatchingRule": {
+            "entity": "MatchingRule",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "MyDomainDiscoverableLogin": {
+            "entity": "MyDomainDiscoverableLogin",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "OmniDataTransform": {
+            "entity": "OmniDataTransform",
+            "fields": [
+                "UniqueName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "UniqueName",
+            "where_clause": ""
+        },
+        "OmniExtTrackingDef": {
+            "entity": "OmniExtTrackingDef",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "OmniInteractionAccessConfig": {
+            "entity": "OmniInteractionAccessConfig",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "OmniInteractionConfig": {
+            "entity": "OmniInteractionConfig",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "OmniTrackingGroup": {
+            "entity": "OmniTrackingGroup",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "OmniUiCard": {
+            "entity": "OmniUiCard",
+            "fields": [
+                "UniqueName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "UniqueName",
+            "where_clause": ""
+        },
+        "Report": {
+            "entity": "Report",
+            "fields": [
+                "DeveloperName",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "DeveloperName",
+            "where_clause": ""
+        },
+        "Translations": {
+            "entity": "Translation",
+            "fields": [
+                "Language",
+                "LastModifiedDate",
+                "LastModifiedBy.Name"
+            ],
+            "order_by": "Language",
+            "where_clause": ""
+        }
+    }
+}

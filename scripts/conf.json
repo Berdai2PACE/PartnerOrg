@@ -1,0 +1,16 @@
+{
+  "sourceOrgURL": "https://prodeval22--dev2pace.sandbox.my.salesforce.com",
+  "targetOrgURL": "https://prodeval22--integ2pace.sandbox.my.salesforce.com",
+  "dataDir": "../../data/json",
+  "consolidatedDir": "../../data/csv",
+  "logDir": "../../data/log",
+  "targets": [
+    "ALL"
+  ],
+  "GoogleSheetProgress": "",
+  "objectList": [],
+  "nameOverride": {},
+  "ExtIdRecipe": {},
+  "additionalWhere": {},
+  "clearObject": false
+}

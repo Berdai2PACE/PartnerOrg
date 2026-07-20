@@ -1,0 +1,92 @@
+name: Salesforce Org Partial Metadata Backup 🔄
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 */6 * * *"
+
+jobs:
+  PartialMetadataBackup:
+    runs-on: ubuntu-latest
+    container: nanon22/sf_backup:latest
+    strategy:
+      matrix:
+          # These must match your GitHub Environment names exactly
+        env: [UAT, PROD]
+        # This line tells GitHub which environment's variables to load
+    environment: ${{ matrix.env }}
+    env:
+        ORG: ${{ matrix.env }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Partial Metadata Backup
+        run: |
+
+          git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+          git config --global user.email ${{ vars.BACKUP_USEREMAIL }}
+          git config --global user.name ${{ vars.BACKUP_USERNAME }}
+
+        
+          ORG_NAME=${{ matrix.env }}
+          BRANCH_NAME=${{ vars.branch_name }}
+          BACKUP_MESSAGE="${{ vars.backup_message }}"
+
+          echo "##[section]---Run backup for $ORG_NAME...---"
+
+          echo "##[command]git switch $BRANCH_NAME"
+          git switch $BRANCH_NAME
+
+          echo " "
+          echo " "
+
+          echo "##[section]---Parsing SFDX Auth URL...---"
+          echo "org alias $ORG_NAME looking for secret "
+          echo ${{ secrets.SFDXAUTHURL }} > ./SFDX_URL.txt
+
+          echo "##[command]sf org login sfdx-url --sfdx-url-file SFDX_URL.txt -a $ORG_NAME --set-default"
+          {
+            LOGIN_INFO=$(sf org login sfdx-url --sfdx-url-file SFDX_URL.txt -a $ORG_NAME --set-default --json)
+          } || {
+            echo "##[error]Failed to login to org"
+            continue
+          }
+
+          echo "##[section]Successfully logged in to org"
+
+          ACCESS_TOKEN=$(echo $LOGIN_INFO | jq -r .result.accessToken)
+          INSTANCE_URL=$(echo $LOGIN_INFO | jq -r .result.instanceUrl)
+
+          echo " "
+          echo " "
+
+          echo "##[command]python /sf_backup.py {ACCESS_TOKEN} $INSTANCE_URL --query-all"
+          python /sf_backup.py $ACCESS_TOKEN $INSTANCE_URL --query-all
+
+          echo "##[command]ls SanitizedPackages"
+          echo "##[section]list of packages :"
+          ls SanitizedPackages
+
+          echo " "
+          echo " "
+
+          echo "##[command]sf project retrieve start -x SanitizedPackages/*"
+          sf project retrieve start -x SanitizedPackages/*
+
+          echo " "
+          echo " "
+
+          echo "##[command]git add force-app/"
+          git add force-app/
+          
+          # Check if there are any staged changes
+          if ! git diff --cached --quiet; then
+            echo "##[command]git commit -m \"$BACKUP_MESSAGE - $(date +%F\ %H:%M)\""
+            git commit -m "$BACKUP_MESSAGE - $(date +%F\ %H:%M)"
+            echo "##[command]git push origin $BRANCH_NAME"
+            git push origin $BRANCH_NAME
+          else
+            echo "No changes detected in force-app. Skipping commit."
+          fi
+

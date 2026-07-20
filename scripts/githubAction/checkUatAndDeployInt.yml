@@ -1,0 +1,79 @@
+# Manual updates in in job step "Login & Process Deployment" below:
+# - variables for additional branches: add SFDX_CLIENT_ID / KEY variables
+# - To use slack notifications, you can also define SLACK_TOKEN and SLACK_CHANNEL_ID
+#   - For branch scoped messages, add SLACK_CHANNEL_ID_ + branch name (ex: SLACK_CHANNEL_ID_INTEGRATION, SLACK_CHANNEL_ID_UAT)
+
+on:
+  pull_request:
+    # Add your major branches names here
+    branches:
+      - main
+      - integ
+      - uat
+    types: [opened, edited, synchronize, reopened]
+name: Simulate Deployment
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  check_deployment:
+    runs-on: ubuntu-latest
+    name: Simulate Deployment to Major Org
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      # Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          persist-credentials: true
+          fetch-depth: 0 # Fetch all branches
+      # Setup node
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+      # SFDX & plugins
+      - name: Install SFDX and plugins
+        run: |
+          npm install --no-cache @salesforce/cli --global
+          echo 'y' | sf plugins install sfdx-git-delta
+          sf version --verbose --json
+      # Login & check deploy with test classes & code coverage
+      - name: Login & Simulate deployment
+        env:
+          SFDX_DEPLOY_WAIT_MINUTES: 120 # Override if necessary
+          SFDX_TEST_WAIT_MINUTES: 120 # Override if necessary
+          CI_COMMIT_REF_NAME: ${{ github.event.pull_request.base.ref }} # Defines the target branch of the PR
+          CI_COMMIT_REF_SHA: ${{ github.event.pull_request.base.sha }} # Defines the target branch of the PR
+          CI_COMMIT_HEAD_NAME: ${{ github.event.pull_request.head.ref }} # Defines the target branch of the PR
+          CI_COMMIT_HEAD_SHA: ${{ github.event.pull_request.head.sha }} # Defines the target branch of the PR
+          ORG_ALIAS: ${{ github.event.pull_request.base.ref }} # Defines the target branch of the PR
+          CONFIG_BRANCH: ${{ github.event.pull_request.base.ref }} # Defines the target branch of the PR
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          FORCE_COLOR: "1"
+        run: |
+          if [ $ORG_ALIAS == "integ" ]; then
+            echo ${{ secrets.SFDXAUTHURL_UAT }} > ./SFDX_URL.txt
+            echo ${{ secrets.SFDXAUTHURL_INTEG }} > ./SFDX_IntegURL.txt
+          elif [ $ORG_ALIAS} == "main" ]; then
+            echo ${{ secrets.SFDXAUTHURL_PROD }} > ./SFDX_URL.txt
+          fi
+          sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt --set-default
+          git config --global --add safe.directory /__w/core-platform/core-platform
+          echo "$(git branch)"
+          mkdir sgdPackage/
+          echo " sf sgd source delta --to HEAD --from origin/$CONFIG_BRANCH --output sgdPackage/ --generate-delta"
+          sf sgd source delta --to "HEAD" --from "origin/$CONFIG_BRANCH" --output sgdPackage/ --generate-delta
+          echo "sf project deploy start --dry-run --ignore-conflicts  --source-dir sgdPackage/force-app  "
+          sf project deploy start --dry-run --ignore-conflicts  --source-dir sgdPackage/force-app  
+          sf org login sfdx-url --sfdx-url-file ./SFDX_IntegURL.txt --set-default
+          echo "auto deploy to integ"
+          echo "sf project deploy start --ignore-conflicts  --source-dir sgdPackage/force-app  "
+          sf project deploy start --ignore-conflicts  --source-dir sgdPackage/force-app  

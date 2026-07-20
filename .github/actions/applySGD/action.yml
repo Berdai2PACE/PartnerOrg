@@ -1,0 +1,19 @@
+name: 'Salesforce Git Delta From deployTag'
+description: 'Sync and '
+inputs:
+  org-alias:
+    description: 'org to compare against'
+    required: true
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run Code Analyzer
+      shell: bash
+      run: |          
+        git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+        echo "##[section] Branch Name: $BRANCH_NAME"
+        echo "##[section]Looking for metadata changes..."
+        mkdir sgdPackage
+        sf sgd source delta --to "HEAD" --from deploy${{ inputs.org-alias }} -d --output-dir sgdPackage/

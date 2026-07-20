@@ -1,0 +1,182 @@
+name: Validate SF Metadata PR 🔄
+on:
+  pull_request:
+    # Add your major branches names here
+    branches:
+      - release/**
+    paths:
+    - 'force-app/**'
+    types: [opened, edited, synchronize, reopened]
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.process-branch.outputs.target }}
+    steps:
+      - name: Extract and Uppercase Environment
+        id: process-branch
+        run: |
+          # Get the branch name (e.g., release/staging)
+          FULL_BRANCH="${{ github.event.pull_request.base.ref }}"
+          
+          # 1. Extract the part after 'release/'
+          # 2. Convert to uppercase using 'tr'
+          ENV_NAME=$(echo "${FULL_BRANCH}" | sed 's/^release[-/]//g' | tr '[:lower:]' '[:upper:]')
+          echo $ENV_NAME
+          echo "target=$ENV_NAME" >> $GITHUB_OUTPUT
+  ValidateMetadata:
+    needs: setup-environment  
+    runs-on: ubuntu-latest
+    environment: ${{ needs.setup-environment.outputs.env_name }}
+    container: manu2pace/2pacerunner:latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}  
+      # Check that every new/modified field has FLS in a permission set
+      - name: Check field-level security coverage
+        shell: bash
+        env:
+          CI_COMMIT_REF_NAME: ${{ github.event.pull_request.base.ref }}
+        run: |
+          git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
+          CHANGED_FIELDS=$(git diff --name-only origin/$CI_COMMIT_REF_NAME...HEAD -- '*.field-meta.xml')
+          if [ -z "$CHANGED_FIELDS" ]; then
+            echo "No field-meta.xml files changed, skipping FLS check."
+            exit 0
+          fi
+          MISSING=()
+          for field_file in $CHANGED_FIELDS; do
+            # Extract object and field name from path
+            # Expected: force-app/main/default/objects/<Object>/fields/<Field>.field-meta.xml
+            object=$(echo "$field_file" | sed 's|.*/objects/\([^/]*\)/fields/.*|\1|')
+
+            # Skip Platform Event objects (suffix __e, case-insensitive)
+            if echo "$object" | grep -qi '__e$'; then
+              echo "Skipping Platform Event field: $object (from $field_file)"
+              continue
+            fi
+
+            field=$(basename "$field_file" .field-meta.xml)
+            reference="${object}.${field}"
+
+            # Skip MasterDetail fields (FLS is not applicable to them)
+            if grep -q '<type>MasterDetail</type>' "$field_file"; then
+              echo "Skipping MasterDetail field: $reference (from $field_file)"
+              continue
+            fi
+
+            # Skip required fields (FLS is not applicable to them)
+            if grep -q '<required>true</required>' "$field_file"; then
+              echo "Skipping required field: $reference (from $field_file)"
+              continue
+            fi
+
+            if ! grep -rl "<field>${reference}</field>" force-app/main/default/permissionsets/ > /dev/null 2>&1; then
+              MISSING+=("$reference (from $field_file)")
+            fi
+          done
+
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "ERROR: The following fields are not referenced in any permission set:"
+            for m in "${MISSING[@]}"; do
+              echo "  - $m"
+            done
+            echo ""
+            echo "Add the field to at least one permission set under force-app/main/default/permissionsets/"
+            exit 1
+          fi
+
+          echo "All changed fields have FLS coverage in a permission set."
+      - name: git delta
+        shell: bash
+        run: |          
+          echo "##[section] Branch Name: $BRANCH_NAME"
+          echo "##[section]Looking for metadata changes..."
+          mkdir sgdPackage
+          sf sgd source delta --to "HEAD" --from deploy${{ needs.setup-environment.outputs.env_name }} -d --output-dir sgdPackage/
+      - name: Validate Metadata
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
+          ORG_NAME: ${{ needs.setup-environment.outputs.env_name }}
+
+        run: |
+          git config --global --add safe.directory /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}
+
+          echo "##[section] Branch Name: $BRANCH_NAME"
+
+          echo "##[section] Setting connexion org alias ${{ env.ORG_NAME }} "
+          echo ${{ secrets.SFDXAUTHURL }} > ./SFDX_URL.txt
+          echo "##[section]Defining target org for branch $BRANCH_NAME..."
+
+          echo "##[command]sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default"
+          sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default
+
+          echo "##[section]Package contents:"
+
+          if [ -d "sgdPackage/force-app" ]; then
+              SGD_SOURCE1="-d sgdPackage/force-app"
+              find sgdPackage/force-app | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
+          fi
+
+          echo " "
+          echo " "
+
+          if [ -f test-classes.txt ]; then
+              echo "##[section]Building test class list..."
+              SF_RUNTESTS=`tr -s '\n' ' ' < test-classes.txt | sed 's/,$//'`
+              if [ -n "$SF_RUNTESTS" ]; then
+                echo "##[section]Tests to run: $SF_RUNTESTS"
+                TEST_CMD="-l RunSpecifiedTests -tests $SF_RUNTESTS"
+              else
+                TEST_CMD="-l RunRelevantTests"
+                echo "##[command] RunRelevantTests."
+              fi
+          fi
+
+          echo " "
+          echo " "
+
+          if [ -d "sgdPackage/force-app" ]; then
+            echo "##[section]---Validate to target_org...---"
+
+            echo "##[command]sf project deploy start -c $SGD_SOURCE1 $SGD_SOURCE2 -o target_org $TEST_CMD --dry-run --json"
+            sf project deploy start -c $SGD_SOURCE1 $SGD_SOURCE2 -o target_org $TEST_CMD --dry-run 
+          fi
+      - name: Execute Quality Action
+        if: vars.CHECKCODE == 'true'
+        uses: ./.github/actions/code-quality
+        with:
+          github-token: ${{ secrets.PAT_PR }}
+          pr-number: ${{ github.event.pull_request.number }}
+      - name: Deploy to Integ org
+        if: vars.FORCEDEPLOY == 'true'
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
+          ORG_NAME: ${{ needs.setup-environment.outputs.env_name }}
+        run: |
+          echo "##[section] Setting connexion org alias ${{ env.ORG_NAME }} looking for secret $format('SFDXAUTHURL_{0}', ${{ env.ORG_NAME }})"
+          echo ${{ secrets.SFDXAUTHURL_FORCEDEPLOY }} > ./SFDX_URL.txt
+          echo "##[command]sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default"
+          sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default
+
+          if [ -f test-classes.txt ]; then
+              echo "##[section]Building test class list..."
+              SF_RUNTESTS=`tr -s '\n' ' ' < test-classes.txt | sed 's/,$//'`
+              if [ -n "$SF_RUNTESTS" ]; then
+                echo "##[section]Tests to run: $SF_RUNTESTS"
+                TEST_CMD="-l RunSpecifiedTests -tests $SF_RUNTESTS"
+              else
+                echo "##[command]No tests to run."
+              fi
+          fi
+
+          echo "##[section]---Deploy to integration...---"
+
+          if [ -d "sgdPackage/force-app" ]; then
+            echo "##[command]sf project deploy start -c $SGD_SOURCE1 $SGD_SOURCE2 $TEST_CMD "
+            sf project deploy start --source-dir sgdPackage/force-app  $TEST_CMD  
+          fi

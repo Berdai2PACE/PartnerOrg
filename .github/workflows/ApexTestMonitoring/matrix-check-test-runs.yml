@@ -1,0 +1,106 @@
+name: Check Test Runs
+
+on:
+  # This schedule should be X hours after the schedule-test-runs.yml, depending on how long your tests take to run. This is one is configured at 4 AM, 4 hours after the tests are scheduled. 
+  schedule:
+    - cron: '47 4 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  check_tests:
+
+    strategy:
+      matrix:
+        sf_org_alias: [PROD, UAT]
+
+    env:
+        ORG: ${{ matrix.sf_org_alias }}
+
+    environment: ${{ matrix.sf_org_alias }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5    # Use 3rd party GitHub action to download the artifact created in the previous job. The artifact contains the test run Id
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{secrets.GH_TOKEN}}
+        workflow: matrix-schedule-test-runs.yml
+        workflow_conclusion: success
+        name: ${{ matrix.sf_org_alias }}_test_run_id
+        name_is_regexp: true
+    - name: Store test run Id in env variable
+      run: |
+        cd ${{ matrix.sf_org_alias }}_test_run_id
+        TEST_RUN_ID=$(cat ${{ matrix.sf_org_alias }}_test_run_id.txt)
+        echo "TEST_RUN_ID=$TEST_RUN_ID" >> $GITHUB_ENV
+    # Setup node
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "20"
+    # SFDX 
+    - name: Install SFDX and plugins
+      run: |
+        npm install @salesforce/cli --global
+    - name: Populate auth file with SFDX_URL secret
+      run: |
+        echo ${{ secrets.SFDXAUTHURL }} > ./SFDX_URL.txt
+
+    - name: Authenticate to Org
+      run: sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt --set-default --alias ${{ matrix.sf_org_alias }}
+
+    # First, run the "get test" command just to print the output to the GitHub terminal. This way if you come back to the job, you can see the entire output
+    # The second command is run so that we can put the output on a .json file, that we use to create the slack notification via a nodejs script
+    # The || true command allows the command to return a success code even if the test fails, this allows us to continue running the job, which is
+    # necessary so that we can send the notification
+    - name: "Extract apex test results"
+      run: |
+        sf apex get test -i ${{env.TEST_RUN_ID}} || true
+        sf apex get test -i ${{env.TEST_RUN_ID}} --json > result.json || true
+        node ./scripts/node/ApexTestMonitoring/parseResult.js
+        cat ./slackPayload.json
+
+    - name: Forward a saved message
+      uses: slackapi/slack-github-action@v2.1.1
+      id: slack
+      with:
+        payload-file-path: "./slackPayload.json"
+        payload-templated: false
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+      env:
+        SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        
+  # send_final_message:
+  #   runs-on: ubuntu-latest
+  #   needs: [check_tests]
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Post to a Slack channel
+  #       id: slack
+  #       uses: slackapi/slack-github-action@v1.24.0
+  #       with:
+  #         # Slack channel id, channel name, or user id to post message.
+  #         # See also: https://api.slack.com/methods/chat.postMessage#channels
+  #         # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
+  #         channel-id: 'C062G1V3KKK'
+  #         # For posting a simple plain text message
+  #         payload: |
+  #           {
+  #             "text": "See unit tests results",
+  #             "blocks": [
+  #               {
+  #               "type": "section",
+  #               "text": {
+  #                 "type": "mrkdwn",
+  #                 "text":"To see the entire output of the test runs for each org, click *<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>*"
+                 
+  #               }
+  #             }
+  #               ]
+  #             }
+  #       env:
+  #         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        

@@ -1,0 +1,127 @@
+name: Deploy SF Metadata PR 🔄
+on:
+  pull_request:
+    types: 
+      - closed
+
+jobs:
+  DeployMetadata:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    container: nanon22/sf-cli-jq:latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+        
+      - name: Deploy Metadata
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
+          SOURCEBRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ secrets.CI_PAT }}
+
+        run: |
+
+          CURRENT_WORKING_DIR="$PWD"
+
+          cd /root/.local/share/sf/node_modules/sfdx-git-delta
+          sfdx plugins link sfdx-git-delta
+
+          cd $CURRENT_WORKING_DIR
+
+          git config --global --add safe.directory /__w/salesforce/salesforce
+
+          echo "##[section] Branch Name: $BRANCH_NAME"
+
+          ORG_NAME=$(echo $BRANCH_NAME | cut -d "/" -f 2)
+
+          SFDXAUTHURL_NAME=$(echo "${{ vars.BRANCHES_CONFIG }}" | base64 --decode | jq -r .$ORG_NAME.auth_url_variable_name)
+          NEXT_STEP_BRANCH=$(echo "${{ vars.BRANCHES_CONFIG }}" | base64 --decode | jq -r .$ORG_NAME.next_branch)
+
+          echo "##[section]Looking for metadata changes..."
+
+
+          CURRENT_COMMIT_HASH=`git log --pretty=format:"%H" -1`
+          LAST_COMMIT_HASH=`git log --pretty=format:"%H" -1 origin/$BRANCH_NAME --skip=1`
+
+          echo "##[command]Last commit hash: $LAST_COMMIT_HASH"
+
+          mkdir sgdPackage
+
+          sf sgd source delta --to "HEAD" --from $LAST_COMMIT_HASH -d --output-dir sgdPackage/
+
+          SGD_SOURCE1=""
+          SGD_SOURCE2=""
+
+          echo "##[section]Package contents:"
+
+          if [ -d sgdPackage/force-app ]; then
+              SGD_SOURCE1="-d sgdPackage/force-app"
+              find sgdPackage/force-app | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
+          fi
+
+          if [ -d sgdPackage/src ]; then
+              SGD_SOURCE2="-d sgdPackage/src"
+              if [ -d sgdPackage/src/temp/main/default/translations ]; then
+                rm -fr sgdPackage/src/temp/main/default/translations
+              fi
+              find sgdPackage/src | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
+          fi
+
+          if [ -z "$SGD_SOURCE1" ] && [ -z "$SGD_SOURCE2" ]; then
+            echo "##[command]No sources to Deploy. Skipping validation."
+            exit 0
+          fi
+
+          echo " "
+          echo " "
+
+          echo "##[section]Defining target org for branch $BRANCH_NAME..."
+
+          echo "##[section]---Parsing SFDX Auth URL...---"
+          SFDXAUTHURL=$(echo "${{ secrets.SFDXAUTHURL }}" | base64 --decode | jq -r .$SFDXAUTHURL_NAME)
+          echo $SFDXAUTHURL > ./SFDX_URL.txt
+          
+          echo "##[command]sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default"
+          sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt -a target_org --set-default
+
+          echo " "
+          echo " "
+
+          if [ -f test-classes.txt ]; then
+              echo "##[section]Building test class list..."
+              SF_RUNTESTS=`tr -s '\n' ' ' < test-classes.txt | sed 's/,$//'`
+              if [ -n "$SF_RUNTESTS" ]; then
+                echo "##[section]Tests to run: $SF_RUNTESTS"
+                TEST_CMD="-l RunSpecifiedTests -tests $SF_RUNTESTS"
+              else
+                echo "##[command]No tests to run."
+              fi
+          fi
+
+          echo " "
+          echo " "
+
+          echo "##[section]---Deploy to target_org...---"
+
+          echo "##[command]sf project deploy start -c $SGD_SOURCE1 $SGD_SOURCE2 -o target_org --json"
+          JOB_RESULT=$(sf project deploy start -c $SGD_SOURCE1 $SGD_SOURCE2 -o target_org --json)
+
+          JOB_ID=$(echo $JOB_RESULT | jq -r .result.id)
+          JOB_STATUS=$(echo $JOB_RESULT | jq -r .result.status)
+
+          echo "##[command]JOB_ID: $JOB_ID"
+          echo "##[command]JOB_STATUS: $JOB_STATUS"
+
+          if [ "$JOB_STATUS" != "Succeeded" ]; then
+            echo "##[error]Deploy to target_org failed with status $JOB_STATUS."
+            exit 1
+          fi
+
+          if [ -z "$NEXT_STEP_BRANCH" ]; then
+            echo "##[command]No next step branch. Skipping validation."
+            exit 0
+          else
+            gh pr create --base $NEXT_STEP_BRANCH --head $BRANCH_NAME --title "Deployed to $BRANCH_NAME on $(date +%F\ %H:%M)" --body "These changes have been deployed to $BRANCH_NAME on $(date +%F\ %H:%M). Please review in $BRANCH_NAME environment and merge if appropriate." || echo "##[section]Pull request already existe between $BRANCH_NAME and $NEXT_STEP_BRANCH"
+          fi

@@ -1,0 +1,55 @@
+name: Schedule Test Runs
+
+on:
+  schedule:
+    # Modify this to specify when the job should run. The below is daily at 12 AM GMT
+    - cron: '47 0 * * 1-5'
+  # Allows the workflow to be run manually through the GitHub UI
+  workflow_dispatch:
+
+jobs:
+  schedule_tests:
+    strategy:
+      matrix:
+        sf_org_alias: [PROD, UAT]
+
+    env:
+        ORG: ${{ matrix.sf_org_alias }}
+
+    environment: ${{ matrix.sf_org_alias }}
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - run: echo what is the secret ${{env.ORG}}
+
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    # Setup node
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: "20"
+    # SFDX & plugins
+    - name: Install SFDX and plugins
+      run: |
+        npm install @salesforce/cli --global
+
+    - name: Populate auth file with SFDX_URL secret
+      run: | 
+        echo "trying secret for env.ORG ${{env.ORG}}" 
+        echo ${{ secrets.SFDXAUTHURL > ./SFDX_URL.txt
+        sf org login sfdx-url --sfdx-url-file ./SFDX_URL.txt --set-default --alias ${{ matrix.sf_org_alias }}
+
+    - name: Run all tests and store test run Id
+      run: |
+        sf apex run test --suite-names DailySurveillance --result-format human > ./id.txt
+        echo "$(node ./scripts/node/ApexTestMonitoring/extractId.js)" > ${{ matrix.sf_org_alias }}_test_run_id.txt
+
+    - name: Upload the test run Id as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.sf_org_alias }}_test_run_id
+        path: ${{ matrix.sf_org_alias }}_test_run_id.txt
+        overwrite: true

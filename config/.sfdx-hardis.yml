@@ -1,0 +1,16 @@
+apexTestsMinCoverageOrgWide: 75
+developmentBranch: uat
+devHubAlias: ''
+devHubInstanceUrl: https://login.salesforce.com
+devHubUsername: ''
+enableDeltaDeploymentBetweenMajorBranches: false
+enableDeploymentApexTestClasses: false
+enableDeprecatedDeploymentPlan: false
+installPackagesDuringCheckDeploy: false
+manualActionsFileUrl: ''
+newTaskNameRegex: ''
+newTaskNameRegexExample: ''
+sharedDevSandboxes: false
+useDeltaDeployment: false
+useDeltaDeploymentWithDependencies: false
+useSmartDeploymentTests: false

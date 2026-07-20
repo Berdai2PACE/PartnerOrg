@@ -1,0 +1,108 @@
+{
+  "version": "2.0.0",
+  "tasks": [  
+    {
+      "label": "SFDC: Generate & Deploy Picklist from Google Sheet",
+      "type": "shell",
+      "command": "Rscript scripts/R/globalValueSetHandler.R '${input:sheetUrl}' ",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "2PACE : Retrieve Active Flows repo",
+      "type": "shell",
+      "command": "./scripts/bash/retrieveLatestActiveFlow.sh",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "2PACE Check Merge & Create PR",
+      "type": "shell",
+      // This command now derives the Org Name from the selected branch
+      "command": "./scripts/bash/handleMerge.sh ${input:branchToMerge} ${input:prTitle} ${input:prBody}",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "2PACE init branch",
+      "type": "shell",
+      // This command now derives the Org Name from the selected branch
+      "command": "./scripts/bash/initLocalBranch.sh ${input:ticketname} ${input:branchtype} ",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ],
+  // This section defines the prompts
+  "inputs": [
+    {
+      "id": "branchToMerge",
+      "type": "pickString",
+      "description": "Select the release branch to check against HEAD",
+      "options": [
+        "release/QA",
+        "release/UAT"
+      ],
+      "default": "release/QA"
+    },
+    {
+      "id": "branchtype",
+      "type": "pickString",
+      "description": "Select the type of branch",
+      "options": [
+        "feature/",
+        "package/",
+        "hotfix/"
+      ],
+      "default": "feature/"
+    },
+    {
+      "id": "ticketname",
+      "type": "promptString",
+      "description": "Enter the branch Name",
+      "default": ""
+    },
+    {
+      "id": "prTitle",
+      "type": "promptString",
+      "description": "Enter the Pull Request Title",
+      "default": ""
+    },
+    {
+      "id": "prBody",
+      "type": "promptString",
+      "description": "Enter the Pull Request Body",
+      "default": ""
+    },
+    {
+      "id": "sheetUrl",
+      "type": "promptString",
+      "description": "Paste the Google Sheet URL",
+      "default": "https://docs.google.com/spreadsheets/d/..."
+    }
+  ]
+}
