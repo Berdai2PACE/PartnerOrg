@@ -21,7 +21,7 @@ jobs:
           
           # 1. Extract the part after 'release/'
           # 2. Convert to uppercase using 'tr'
-          ENV_NAME=$(echo "${FULL_BRANCH}" | sed 's/^release[-/]//g' | tr '[:lower:]' '[:upper:]')
+          ENV_NAME=$(echo "${FULL_BRANCH}" | sed 's/^release[-/]//g' | tr '[:upper:]' '[:lower:]')
           echo $ENV_NAME
           echo "target=$ENV_NAME" >> $GITHUB_OUTPUT
   ValidateMetadata:

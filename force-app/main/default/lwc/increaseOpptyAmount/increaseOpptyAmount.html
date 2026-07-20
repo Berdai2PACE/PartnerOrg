@@ -1,0 +1,36 @@
+<template>
+    <lightning-card title="Update Opportunity Amounts" icon-name="standard:opportunity">
+        <div class="slds-p-around_medium">
+            <p class="slds-text-heading_small slds-m-bottom_medium">COUCOU ! Successful LWC creation!</p>
+
+            <lightning-combobox
+                label="Change Type"
+                value={changeType}
+                options={changeTypeOptions}
+                onchange={handleChangeTypeChange}
+            ></lightning-combobox>
+
+            <lightning-input
+                class="slds-m-top_medium"
+                type="number"
+                label={valueInputLabel}
+                value={value}
+                step="0.01"
+                onchange={handleValueChange}
+            ></lightning-input>
+
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label="Apply"
+                    onclick={handleApply}
+                    disabled={isApplyDisabled}
+                ></lightning-button>
+            </div>
+
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Updating..." size="small"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>
